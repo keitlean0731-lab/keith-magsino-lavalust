@@ -1,0 +1,96 @@
+<?php
+defined('PREVENT_DIRECT_ACCESS') OR exit('No direct script access allowed');
+/**
+ * ------------------------------------------------------------------
+ * LavaLust - an opensource lightweight PHP MVC Framework
+ * ------------------------------------------------------------------
+ *
+ * MIT License
+ *
+ * Copyright (c) 2020 Ronald M. Marasigan
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package LavaLust
+ * @author Ronald M. Marasigan <ronald.marasigan@yahoo.com>
+ * @since Version 1
+ * @link https://github.com/ronmarasigan/LavaLust
+ * @license https://opensource.org/licenses/MIT MIT License
+ */
+
+/*
+| -------------------------------------------------------------------
+| URI ROUTING
+| -------------------------------------------------------------------
+| Here is where you can register web routes for your application.
+|
+|
+*/
+/** @var object $router **/
+
+$router->any('/', 'AuthController::login');
+$router->any('/login', 'AuthController::login');
+$router->get('/logout', 'AuthController::logout');
+
+// API authentication
+$router->group(['prefix' => '/api'], function ($router) {
+    // Browsers send OPTIONS before JSON requests from the Vercel frontend.
+    $router->options('/login', 'ApiController::preflight');
+    $router->options('/register', 'ApiController::preflight');
+    $router->options('/logout', 'ApiController::preflight');
+    $router->options('/refresh', 'ApiController::preflight');
+    $router->options('/profile', 'ApiController::preflight');
+    $router->options('/users', 'ApiController::preflight');
+    $router->options('/users/{id}', 'ApiController::preflight');
+    $router->options('/products', 'ApiController::preflight');
+    $router->options('/products/{id}', 'ApiController::preflight');
+    $router->post('/login', 'ApiController::login');
+    $router->post('/register', 'ApiController::register');
+    $router->post('/logout', 'ApiController::logout');
+    $router->post('/refresh', 'ApiController::refresh');
+    $router->get('/profile', 'ApiController::profile');
+    $router->get('/users', 'ApiController::list');
+    $router->post('/users', 'ApiController::create');
+    $router->put('/users/{id}', 'ApiController::update');
+    $router->delete('/users/{id}', 'ApiController::delete');
+    $router->get('/products', 'ApiController::products');
+    $router->post('/products', 'ApiController::product_create');
+    $router->put('/products/{id}', 'ApiController::product_update');
+    $router->delete('/products/{id}', 'ApiController::product_delete');
+});
+
+// migrations
+$router->get('/migration/create/{migration_class}', 'MigrationController::create_migration');
+$router->get('/migration/migrate', 'MigrationController::migrate');
+$router->get('/migration/rollback', 'MigrationController::rollback');
+$router->get('/migration/rollback-all', 'MigrationController::rollback_all');
+$router->get('/migration/refresh', 'MigrationController::refresh');
+$router->get('/migration/status', 'MigrationController::status');
+
+$router->group(['middleware' => 'AuthMiddleware'], function ($router) {
+    $router->get('/product/display', 'ProductController::read');
+    $router->any('/product/create', 'ProductController::create');
+    $router->any('/product/edit/{id}', 'ProductController::edit');
+    $router->get('/product/delete/{id}', 'ProductController::delete');
+
+    $router->get('/products', 'ProductController::read');
+    $router->any('/products/create', 'ProductController::create');
+    $router->any('/products/edit/{id}', 'ProductController::edit');
+    $router->get('/products/delete/{id}', 'ProductController::delete');
+});
